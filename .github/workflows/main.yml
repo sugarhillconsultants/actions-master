@@ -1,0 +1,115 @@
+on: [push, pull_request]
+
+jobs:
+  make:
+    runs-on: ubuntu-latest
+    steps:
+    - name: checkout repo
+      uses: actions/checkout@v2
+    - name: build application
+      run: |
+        make setup
+        make test
+        make run
+  lint:
+    needs: make
+    runs-on: ubuntu-latest
+    steps:
+      - name: Lint with flake8
+        run: |
+          pip install flake8
+          # stop the build if there are Python syntax errors or undefined names
+          flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+          # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
+          flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+  matrix:
+    needs: lint
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.6", "3.7", "3.8", "3.9", "3.10"]
+        os: [ubuntu-latest]
+        include:
+          - python-version: 3.x
+            os: ubuntu-latest
+            experimental: true
+          - python-version: 3.x
+            os: ubuntu-latest
+    name: A job to say hello
+    steps:
+      # To use this repository's private action,
+      # you must check out the repository
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Hello world action step
+        uses: ./ # Uses an action in the root directory
+        id: hello
+        with:
+          who-to-greet: 'Romeo Peay'
+      # Use the output from the `hello` step
+      - name: Get the output time
+        run: echo "The time was ${{ steps.hello.outputs.time }}"
+      - uses: actions/upload-artifact@v2
+        with:
+          name: my-artifact
+          path: artifact/
+  test:
+    needs: matrix
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install Python 3
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.6
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pytest
+          pip install coverage
+      - name: Run tests with pytest
+        run: pytest test.py --doctest-modules --junitxml=junit/test-results-${{ matrix.python-version }}.xml
+      - name: Coverage for tests
+        run: coverage run -m pytest test.py --doctest-modules --junitxml=junit/test-results-${{ matrix.python-version }}.xml
+      - name: Upload pytest test results
+        uses: actions/upload-artifact@v2
+        with:
+          name: pytest-results-${{ matrix.python-version }}
+          path: junit/test-results-${{ matrix.python-version }}.xml
+        # Use always() to always run this step to publish test results when there are test failures
+        if: ${{ always() }}
+        
+#   sonarqube:
+#     needs: test
+#     name: SonarQube
+#     runs-on: self-hosted
+#     steps:
+#     - uses: philips-software/sonar-scanner-action@<version>
+#       with:
+#         token: ${{ secrets.SONARQUBE_TOKEN }}
+#         projectName: My Project Name
+#         projectKey: project.key.from.sonar.qube
+#         url: https://your.sonar.instance.io/
+#         isCommunityEdition: true
+#   continuous-deployment:
+#     runs-on: ubuntu-latest
+#     needs: [sonarqube]
+#     if: github.ref == 'refs/heads/main'
+#     steps:
+#      # Step 1
+#       - name: Configure AWS credentials
+#         uses: aws-actions/configure-aws-credentials@v1
+#         with:
+#           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+#           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+#           aws-region: ${{ secrets.AWS_REGION }}
+#      # Step 2
+#       - name: Create CodeDeploy Deployment
+#         id: deploy
+#         run: |
+#           aws deploy create-deployment \
+#             --application-name Git_Application \
+#             --deployment-group-name development_gropup \
+#             --deployment-config-name CodeDeployDefault.OneAtATime \
+#             --github-location repository=${{ github.repository }},commitId=${{ github.sha }}
