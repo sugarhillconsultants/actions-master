@@ -82,7 +82,7 @@ jobs:
         
   sonarqube:
     needs: test
-     name: SonarQube
+    name: SonarQube
     runs-on: self-hosted
     steps:
     - uses: philips-software/sonar-scanner-action@<version>
