@@ -85,7 +85,7 @@ jobs:
     name: SonarQube
     runs-on: self-hosted
     steps:
-    - uses: philips-software/sonar-scanner-action@<version>
+    - uses: philips-software/sonar-scanner-action@v4
       with:
         token: ${{ secrets.SONARQUBE_TOKEN }}
         projectName: github_python
