@@ -80,18 +80,18 @@ jobs:
         # Use always() to always run this step to publish test results when there are test failures
         if: ${{ always() }}
         
-#   sonarqube:
-#     needs: test
-#     name: SonarQube
-#     runs-on: self-hosted
-#     steps:
-#     - uses: philips-software/sonar-scanner-action@<version>
-#       with:
-#         token: ${{ secrets.SONARQUBE_TOKEN }}
-#         projectName: My Project Name
-#         projectKey: project.key.from.sonar.qube
-#         url: https://your.sonar.instance.io/
-#         isCommunityEdition: true
+  sonarqube:
+    needs: test
+     name: SonarQube
+    runs-on: self-hosted
+    steps:
+    - uses: philips-software/sonar-scanner-action@<version>
+      with:
+        token: ${{ secrets.SONARQUBE_TOKEN }}
+        projectName: github_python
+        projectKey: 94db9764454eff5b476f8435d1572d8dfd7f51a4
+        url: http://18.234.107.18:9000
+        isCommunityEdition: true
 #   continuous-deployment:
 #     runs-on: ubuntu-latest
 #     needs: [sonarqube]
