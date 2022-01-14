@@ -90,7 +90,7 @@ jobs:
     - name: SonarQube Scan
       uses: kitabisa/sonarqube-action@v1.1.0
       with:
-        host: ${{ secrets.SONAR_HOST_URL }}
+        host: ${{ secrets.SONAR_HOST }}
         login: ${{ secrets.SONAR_TOKEN }}
 #   continuous-deployment:
 #     runs-on: ubuntu-latest
