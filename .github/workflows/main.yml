@@ -81,17 +81,17 @@ jobs:
         if: ${{ always() }}     
  
 
-  sonarQube:
-    needs: test
-    name: SonarQube Trigger
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@master
-    - name: SonarQube Scan
-      uses: kitabisa/sonarqube-action@v1.1.0
-      with:
-        host: ${{ secrets.SONAR_HOST }}
-        login: ${{ secrets.SONAR_TOKEN }}
+#  sonarQube:
+#    needs: test
+#    name: SonarQube Trigger
+#    runs-on: ubuntu-latest
+#    steps:
+#    - uses: actions/checkout@master
+#    - name: SonarQube Scan
+#      uses: kitabisa/sonarqube-action@v1.1.0
+#      with:
+#        host: ${{ secrets.SONAR_HOST }}
+#        login: ${{ secrets.SONAR_TOKEN }}
 #   continuous-deployment:
 #     runs-on: ubuntu-latest
 #     needs: [sonarqube]
